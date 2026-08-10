@@ -1,12 +1,15 @@
+from sklearn.cluster import KMeans
+
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.spatial.distance import cdist
 np.random.seed(11)
 
-
+# centers of the clusters
 means = [[2, 2], [8, 3], [3, 6]]
-cov = [[1, 0], [0, 1]] 
-N = 500
+cov = [[1, 0], [0, 1]]
+# N points cluster
+N = 100
 X0 = np.random.multivariate_normal(means[0], cov, N)
 X1 = np.random.multivariate_normal(means[1], cov, N)
 X2 = np.random.multivariate_normal(means[2], cov, N)
@@ -32,19 +35,19 @@ def kmeans_display(X, label):
     plt.plot()
     plt.show()
     
-    
-kmeans_display(X, original_label)
+# run 1 with none sklearn 
+# kmeans_display(X, original_label)
 
-
+# random choice K centers
 def kmeans_init_centers(X, k):
     return X[np.random.choice(X.shape[0], k, replace=False)]
 
-
+# calculate distance and return the index of the closest center
 def kmeans_assign_labels(X, centers):
     D = cdist(X, centers)
     return np.argmin(D, axis=1)
 
-
+# loop, find update centers
 def kmeans_update_centers(X, labels, K):
     centers = np.zeros((K, X.shape[1]))
     for k in range(K):
@@ -52,12 +55,12 @@ def kmeans_update_centers(X, labels, K):
         centers[k,:] = np.mean(Xk, axis = 0)
     return centers
 
-
+# check if centers have converged
 def has_converged(centers, new_centers):
     return (set([tuple(a) for a in centers]) == 
         set([tuple(a) for a in new_centers]))
  
-   
+# call all the above functions to implement kmeans
 def kmeans(X, K):
     centers = [kmeans_init_centers(X, K)]
     labels = []
@@ -71,8 +74,16 @@ def kmeans(X, K):
         it += 1
     return (centers, labels, it)
 
-(centers, labels, it) = kmeans(X, K)
-print('Centers found by our algorithm:')
-print(centers[-1])
+## run 2 with none sklearn 
+# (centers, labels, it) = kmeans(X, K)
+# print('Centers found by our algorithm:')
+# print(centers[-1])
 
-kmeans_display(X, labels[-1])
+# kmeans_display(X, labels[-1])
+
+#using sklearn to check the result
+kmeans = KMeans(n_clusters=K, random_state=11).fit(X)
+print('Centers found by scikit-learn:')
+print(kmeans.cluster_centers_)
+pred_labels = kmeans.predict(X)
+kmeans_display(X, pred_labels)
